@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Onboarding from 'react-native-onboarding-swiper';
+import { color } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-navigation';
 
 const Dots = ({selected})=> {
