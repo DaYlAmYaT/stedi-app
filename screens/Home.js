@@ -4,28 +4,32 @@ import {FontAwesome5} from '@expo/vector-icons';
 import quotes from '../data/quote.json';
 import { Card, CardTitle, CardContent} from 'react-native-material-cards';
 import { LineChart} from 'react-native-chart-kit';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
 const Home = (props) => {
   const token = useRef("");
   const [score, setScore] = useState(0);
-  useEffect(()=>{ todayScore();},[]);
+  useEffect(()=>{ 
+    todayScore();
+  },[]);
 
 //today score
 const todayScore = async() =>{
+  const loginToken = await AsyncStorage.getItem('loginToken');
   let scoreObject ={};
   try{
-    const tokenResponse = await fetch('https://dev.stedi.me/login',{
-  method: 'POST',
-  body:JSON.stringify({
-    userName: "rom19010@byui.edu",
-    password:"Patricia2596@"
-  })
-});
-
- token.current = await tokenResponse.text();
-    const scoreResponse = await fetch('https://dev.stedi.me/riskscore/rom19010@byui.edu',{
+//     const tokenResponse = await fetch('https://dev.stedi.me/login',{
+//   method: 'POST',
+//   body:JSON.stringify({
+//     userName: "rom19010@byui.edu",
+//     password:"Patricia2596@"
+//   })
+// });
+const userEmail = await AsyncStorage.getItem('userEamil');
+ token.current = await AsyncStorage.getItem('sessionToken');
+    const scoreResponse = await fetch('https://dev.stedi.me/riskscore/'+userEmail,{
     method:'GET',
     headers:{
       'Content-Type': 'application/json',

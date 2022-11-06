@@ -1,12 +1,11 @@
 import React, { useEffect, useState, } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, AsyncStorage,TextInput, Button, Alert} from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput, Button, Alert} from 'react-native';
 import  Navigation from './components/Navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from './screens/OnboardingScreen';
 import Home from './screens/Home';
 import { NavigationContainer } from '@react-navigation/native';
-
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const AppStack = createNativeStackNavigator();
@@ -18,7 +17,22 @@ const App = () =>{
   const [homeTodayScore, setHomeTodayScore] = React.useState(0);
   const [tempCode, setTempCode] = React.useState(null);
 
-   if (isFirstLaunch){
+  useEffect(()=>{
+    const getSessionToken = async() => {
+      const sessionToken = await AsyncStorage.getItem('sessionToken');
+      console.log('token from storage', sessionToken);
+
+      const validateResponse = await fetch('https://dev.stedi.me/validate/'+sessionToken);
+
+      if(validateResponse.status == 200){
+        const userEmail = await validateResponse.text();
+        console.log('userEmail', userEmail);
+        setIsLoggedIn(true);
+      }
+    }
+    getSessionToken();
+  },[])
+  if (isFirstLaunch == true &&! isLoggedIn){
 return(
   <OnboardingScreen setFirstLaunch={setFirstLaunch}/>
  
@@ -54,7 +68,6 @@ return(
           }}
         />    
 
-
         <TextInput 
           value={tempCode}
           onChangeText={setTempCode}
@@ -86,10 +99,15 @@ return(
 
             if(loginResponse.status == 200){
               const sessionToken = await loginResponse.text();
-              console.log('Session Token', sessionToken)
+              await AsyncStorage.setItem('sessionToken', sessionToken)
+              console.log('Session Token', sessionToken);
+
+              // AsyncStorage. setItem('sessionToken', seesionToken);
+
               setIsLoggedIn(true);
             }
             else{
+              console.log("Token response Status", loginResponse.status)
               Alert.alert('Warning', 'An invalid code was enteredd.')
             }
           }}
@@ -98,35 +116,37 @@ return(
     )
   }
 }
- export default App;
+export default App;
 
  
- const styles = StyleSheet.create({
-     container:{
-         flex:1, 
-         alignItems:'center',
-         justifyContent: 'center'
-     },
-     input: {
-       height: 40,
-       margin: 12,
-       borderWidth: 1,
-       padding: 10,
-       marginTop: 200
-     },
-     input2: {
+const styles = StyleSheet.create(
+  {
+    container:{
+        flex:1, 
+        alignItems:'center',
+        justifyContent: 'center'
+    },
+    input: {
+      height: 40,
+      margin: 12,
+      borderWidth: 1,
+      padding: 10,
+      marginTop: 200
+    },
+    input2: {
       height: 40,
       margin: 12,
       borderWidth: 1,
       padding: 10,
       marginTop: 50
     },
-     margin:{
-       marginTop:100
-     },
-     button: {
-       alignItems: "center",
-       backgroundColor: "#DDDDDD",
-       padding: 10
-     }    
- })
+    margin:{
+      marginTop:100
+    },
+    button: {
+      alignItems: "center",
+      backgroundColor: "#DDDDDD",
+      padding: 10
+    }    
+ }
+)
